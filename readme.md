@@ -15,15 +15,15 @@ wandb login ee0b5f53d949c84cee7decbe7a629e63fb2f8408
 2. As in DARTS, we hope to run each architecture 10 times. So please run each script 10 times.
 
 ```
-CUDA_VISIBLE_DEVICES=x sh run_eval_cnn_independent.sh "x" r112_e50_48_n6_r2 600 0.025
+CUDA_VISIBLE_DEVICES=x sh run_eval_cnn_independent.sh "x" r112_e50_48_n6_r2 600 0.030
 ```
 
 ```
-CUDA_VISIBLE_DEVICES=x sh run_eval_cnn_independent.sh "x" r116_e100_92_n5_r1 600 0.025
+CUDA_VISIBLE_DEVICES=x sh run_eval_cnn_independent.sh "x" r116_e100_92_n5_r1 600 0.030
 ```
 
 ```
-CUDA_VISIBLE_DEVICES=x sh run_eval_cnn_independent.sh "x" r116_e100_69_n5_r0 600 0.025
+CUDA_VISIBLE_DEVICES=x sh run_eval_cnn_independent.sh "x" r116_e100_69_n5_r0 600 0.030
 ```
 
 # searched RNN architecture evaluation
