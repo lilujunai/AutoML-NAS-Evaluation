@@ -18,6 +18,7 @@ import wandb
 import data
 import model
 from utils import batchify, get_batch, repackage_hidden, create_exp_dir, save_checkpoint
+import utils
 import genotypes
 
 parser = argparse.ArgumentParser(description='PyTorch PennTreeBank/WikiText2 Language Model')
@@ -136,7 +137,7 @@ logging.info('Args: {}'.format(args))
 logging.info('Model total parameters: {}'.format(total_params))
 logging.info('Genotype: {}'.format(genotype))
 
-wandb.run.summary["param_size"] = total_params
+wandb.run.summary["param_size"] = utils.count_parameters_in_MB(total_params)
 
 
 def evaluate(data_source, batch_size=10):
