@@ -13,6 +13,8 @@ import torch.backends.cudnn as cudnn
 import torch.nn as nn
 import torch.nn.functional as F
 
+import wandb
+
 import data
 import model
 from utils import batchify, get_batch, repackage_hidden, create_exp_dir, save_checkpoint
@@ -77,6 +79,14 @@ parser.add_argument('--gpu', type=int, default=0, help='GPU device to use')
 parser.add_argument('--arch', type=str, default='DARTS', help='which architecture to use')
 args = parser.parse_args()
 
+wandb.init(
+    project="automl-gradient-based-nas",
+    name="hw-" + str(args.arch),
+    config=args,
+    entity="automl"
+)
+wandb.config.update(args)  # adds all of the arguments as config variables
+
 if args.nhidlast < 0:
     args.nhidlast = args.emsize
 if args.small_batch_size < 0:
@@ -125,6 +135,8 @@ total_params = sum(x.data.nelement() for x in model.parameters())
 logging.info('Args: {}'.format(args))
 logging.info('Model total parameters: {}'.format(total_params))
 logging.info('Genotype: {}'.format(genotype))
+
+wandb.run.summary["param_size"] = total_params
 
 
 def evaluate(data_source, batch_size=10):
@@ -279,16 +291,22 @@ try:
 
         else:
             val_loss = evaluate(val_data, eval_batch_size)
+            ppl = math.exp(val_loss)
             logging.info('-' * 89)
             logging.info('| end of epoch {:3d} | time: {:5.2f}s | valid loss {:5.2f} | '
                          'valid ppl {:8.2f}'.format(epoch, (time.time() - epoch_start_time),
-                                                    val_loss, math.exp(val_loss)))
+                                                    val_loss, ppl))
             logging.info('-' * 89)
 
+            wandb.log({"evaluation_valid_ppl": ppl, "epoch": epoch})
             if val_loss < stored_loss:
                 save_checkpoint(model, optimizer, epoch, args.save)
                 logging.info('Saving Normal!')
                 stored_loss = val_loss
+
+                wandb.run.summary["best_evaluation_ppl"] = ppl
+                wandb.run.summary["best_evaluation_loss"] = val_loss
+                wandb.run.summary["epoch_of_best_ppl"] = epoch
 
             if 't0' not in optimizer.param_groups[0] and (
                     len(best_val_loss) > args.nonmono and val_loss > min(best_val_loss[:-args.nonmono])):
@@ -308,7 +326,11 @@ parallel_model = model.cuda()
 
 # Run on test data.
 test_loss = evaluate(test_data, test_batch_size)
+ppl = math.exp(test_loss)
 logging.info('=' * 89)
 logging.info('| End of training | test loss {:5.2f} | test ppl {:8.2f}'.format(
     test_loss, math.exp(test_loss)))
 logging.info('=' * 89)
+
+wandb.run.summary["end_evaluation_ppl"] = ppl
+wandb.run.summary["end_evaluation_loss"] = test_loss
