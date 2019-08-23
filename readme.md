@@ -33,3 +33,13 @@ CUDA_VISIBLE_DEVICES=x sh run_eval_cnn_independent.sh "x" r116_e100_69_n5_r0 600
 ```
 CUDA_VISIBLE_DEVICES=x sh run_eval_rnn_independent.sh rnn_r0_e50_44
 ```
+
+# Synchronize local run files
+1. On an Internet connected machine, run "pip install --upgrade wandb" to install wandb.
+2. Download the "wandb" directory to this local machine from the non-connected GPU servers.
+2. Parallel to the wandb directory, run the following command:
+```
+wandb init ee0b5f53d949c84cee7decbe7a629e63fb2f8408
+wandb sync
+```
+
